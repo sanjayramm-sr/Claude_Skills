@@ -1,0 +1,56 @@
+{
+  "_comment": "Per-user settings. FIRST RUN: fill in jira.site_url, your boards, and slack.channel_id (or just tell Claude your channel name and it will resolve and save it). Claude reads this at Step 0 of every run. Values left null are resolved at runtime and written back here.",
+  "jira": {
+    "site_url": null,
+    "assignee": "currentUser()"
+  },
+  "boards": {
+    "_comment": "Your boards in priority order. rank 0 = highest. usesSprints false for Kanban/backlog boards so the sprint filter is skipped instead of silently returning nothing.",
+    "EXAMPLE": {
+      "name": "Replace with your project key and name",
+      "rank": 0,
+      "usesSprints": true
+    }
+  },
+  "ranking": {
+    "_comment": "Single source of truth for ranking weights \u2014 render_canvas.py, render_dashboard.py, and shortlist.py all read this via --weights instead of hardcoding their own copies. Editing here is enough; no script needs a code change. Sort order is: board rank, then Bug-type first, then this weighted score.",
+    "priority_weights": {
+      "Critical": 5,
+      "Highest": 5,
+      "Major": 4,
+      "High": 4,
+      "Medium": 3,
+      "Minor": 2,
+      "Low": 2,
+      "Lowest": 1
+    },
+    "type_weights": {
+      "Bug": 3,
+      "Story": 2,
+      "Improvement": 2,
+      "Task": 1,
+      "Sub-task": 1,
+      "Epic": 1,
+      "Spike": 1
+    }
+  },
+  "slack": {
+    "_comment": "channel_id null = Claude asks once, resolves it, and writes it back. canvas_id null = a new canvas is created on first run and its id saved here. NEVER ship someone else's channel_id or canvas_id \u2014 they are per-workspace and per-user, and another person's ids will fail with a permissions error.",
+    "enabled": true,
+    "channel_id": null,
+    "channel_name": null,
+    "canvas_id": null
+  },
+  "salesforce": {
+    "_comment": "How to reach org metadata, in preference order. All read-only.",
+    "connector_enabled": false,
+    "local_metadata_path": null,
+    "last_snapshot_note": null
+  },
+  "deployment": {
+    "_comment": "Hard guardrail. never_autonomous means no write or deploy EVER happens without the user explicitly approving that specific change in that turn. Scheduled and unattended runs are always read-only regardless of this setting.",
+    "mode": "never_autonomous",
+    "allow_production": false,
+    "require_explicit_confirmation": true
+  }
+}
