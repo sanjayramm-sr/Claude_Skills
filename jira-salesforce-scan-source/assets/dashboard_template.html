@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sprint brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#16233A; --navy-panel:#1F3252; --navy-raise:#27406A;
+    --parchment:#EFE7D6; --signal-amber:#E8A33D; --alert-coral:#D6604D;
+    --sage:#7FA98A; --cfg:#8FA5C4; --ink:#16202C; --mist:#B9C6DE;
+    --line:rgba(185,198,222,.22);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--navy-deep);color:var(--mist);font-family:'Inter',sans-serif;line-height:1.55}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px}
+
+  header.top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;
+    border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:20px}
+  header.top h1{font-family:'Source Serif 4',serif;font-weight:600;font-size:2.1rem;color:#F4F0E6;margin:0 0 4px}
+  header.top .meta{font-size:.88rem}
+  header.top .meta b{color:var(--signal-amber);font-weight:600;font-family:'IBM Plex Mono',monospace}
+
+  .stats{display:flex;gap:24px;flex-wrap:wrap}
+  .stat .n{font-family:'Source Serif 4',serif;font-size:1.5rem;color:#F4F0E6;display:block;line-height:1.15}
+  .stat .l{font-size:.75rem}
+
+  .bar{
+    background:var(--navy-panel);border:1px solid var(--line);border-radius:6px;
+    padding:14px 16px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px;
+  }
+  .fld{display:flex;flex-direction:column;gap:4px}
+  .fld label{font-size:.74rem;color:var(--mist)}
+  .fld input, .fld select{
+    background:var(--navy-deep);border:1px solid var(--line);color:#F4F0E6;
+    padding:8px 10px;border-radius:4px;font-family:'Inter',sans-serif;font-size:.86rem;min-width:140px;
+  }
+  .fld input{font-family:'IBM Plex Mono',monospace;width:110px}
+  .fld input:focus, .fld select:focus{outline:2px solid var(--signal-amber);outline-offset:1px}
+
+  button.refresh{
+    background:var(--signal-amber);color:#1B2A41;border:none;padding:9px 18px;border-radius:4px;
+    font-weight:600;font-size:.86rem;cursor:pointer;font-family:'Inter',sans-serif;
+    display:flex;align-items:center;gap:8px;
+  }
+  button.refresh:hover{filter:brightness(1.08)}
+  button.refresh:disabled{opacity:.6;cursor:wait;filter:none}
+  button.clear{
+    background:none;border:1px solid var(--line);color:var(--mist);padding:8px 14px;border-radius:4px;
+    font-size:.82rem;cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  button.clear:hover{color:#F4F0E6;border-color:var(--mist)}
+
+  .spin{width:12px;height:12px;border:2px solid rgba(27,42,65,.3);border-top-color:#1B2A41;
+    border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+
+  .status-line{font-size:.78rem;padding:2px 2px 18px;min-height:18px}
+  .status-line.err{color:#F0B4A9}
+  .status-line.ok{color:#B4D4BD}
+
+  .sf-banner{
+    background:rgba(232,163,61,.1);border:1px solid rgba(232,163,61,.4);border-radius:5px;
+    padding:12px 15px;margin:6px 0 22px;font-size:.85rem;
+  }
+  .sf-banner b{color:#F0C88A}
+
+  .ticket{background:var(--parchment);color:var(--ink);border-radius:4px;margin-bottom:14px;
+    padding:17px 20px;border-left:5px solid var(--sage)}
+  .ticket.new{border-left-color:var(--alert-coral)}
+  .ticket.cfg{border-left-color:var(--cfg)}
+  .ticket.exist{border-left-color:var(--signal-amber)}
+  .ticket.epic{border-left-color:#8B7FA8}
+
+  .board-head{
+    display:flex;align-items:baseline;gap:10px;margin:28px 0 10px;
+    padding-bottom:6px;border-bottom:1px solid var(--line);
+  }
+  .board-head:first-of-type{margin-top:4px}
+  .board-head h2{font-family:'Source Serif 4',serif;font-size:1.2rem;color:#F4F0E6;margin:0;font-weight:600}
+  .board-head .full{font-size:.8rem;color:var(--mist)}
+  .board-head .fallback{font-size:.75rem;color:var(--signal-amber)}
+  .ticket .row1{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+  .ticket .key a{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:#5B6B7F;text-decoration:none}
+  .ticket .key a:hover{text-decoration:underline}
+  .ticket .pill{font-size:.71rem;padding:2px 9px;border-radius:20px;font-weight:600;background:#DCD3BC;color:#4A4230}
+  .ticket h3{font-family:'Source Serif 4',serif;font-size:1.06rem;margin:4px 0 6px}
+  .ticket .lab{font-size:.72rem;color:#6B7488;margin-bottom:9px}
+  .ticket .sec{margin:0 0 9px;font-size:.88rem;color:#2C3640}
+  .ticket .sec b{font-size:.74rem;color:#5B6B7F;display:block;margin-bottom:2px}
+  .ticket .sec.open{color:#7A4A3A}
+  .ticket .sec.suggest{
+    background:rgba(127,169,138,.14);border-left:3px solid var(--sage);
+    padding:9px 11px;border-radius:0 3px 3px 0;
+  }
+  .ticket .sec.suggest b{color:#3F6B4C}
+  .ticket .placeholder{font-size:.85rem;font-style:italic;color:#6B7488}
+
+  .empty{text-align:center;padding:50px 20px;font-size:.9rem;border:1px dashed var(--line);border-radius:6px}
+  footer{margin-top:32px;padding-top:18px;border-top:1px solid var(--line);font-size:.8rem;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Sprint brief</h1>
+      <div class="meta">Assigned to you · boards LTOR → QTC → GTMPE · Salesforce read as of <b id="sfDate">—</b></div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="bar">
+    <div class="fld">
+      <label for="fSprint">Sprint</label>
+      <input type="text" id="fSprint" placeholder="current">
+    </div>
+    <div class="fld">
+      <label for="fProject">Project</label>
+      <select id="fProject"><option value="">All projects</option></select>
+    </div>
+    <div class="fld">
+      <label for="fStatus">Status</label>
+      <select id="fStatus"><option value="">All statuses</option></select>
+    </div>
+    <button class="refresh" id="refreshBtn" onclick="refresh()">
+      <span id="refreshIcon">↻</span> Refresh from Jira
+    </button>
+    <button class="clear" onclick="clearFilters()">Clear filters</button>
+  </div>
+  <div class="status-line" id="statusLine"></div>
+
+  <div class="sf-banner" id="sfBanner"></div>
+
+  <div id="ticketList"></div>
+
+  <footer>
+    <span id="footLeft"></span>
+    <span id="footRight"></span>
+  </footer>
+</div>
+
+<script>
+// ---- Injected by scripts/render_dashboard.py — do not hand-edit these three lines ----
+const BOARD_CONFIG = __BOARD_CONFIG_JSON__;
+const SF_READ_DATE = "__SF_READ_DATE__";
+const JIRA_SITE = "__JIRA_SITE__";
+const PRI_W = __PRIORITY_WEIGHTS_JSON__;
+const TYPE_W = __TYPE_WEIGHTS_JSON__;
+
+let DATA = __TICKETS_JSON__;
+
+const LABELS = {cfg:"Configuration / admin work", exist:"Touches existing components", new:"Substantive new logic", epic:"Epic — needs breakdown into stories"};
+
+let lastJiraRefresh = null;
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function score(t){ return (PRI_W[t.priority]||3)*10 + (TYPE_W[t.issuetype]||1); }
+function boardRank(t){ return (BOARD_CONFIG[t.project] && BOARD_CONFIG[t.project].rank !== undefined) ? BOARD_CONFIG[t.project].rank : 99; }
+function sortTickets(list){
+  return list.slice().sort((a,b) => {
+    const br = boardRank(a) - boardRank(b);
+    if(br !== 0) return br;
+    const bugA = a.issuetype === 'Bug' ? 0 : 1;
+    const bugB = b.issuetype === 'Bug' ? 0 : 1;
+    if(bugA !== bugB) return bugA - bugB;
+    return score(b) - score(a);
+  });
+}
+function $(id){ return document.getElementById(id); }
+
+function populateFilterOptions(){
+  const projects = [...new Set(DATA.map(t=>t.project))].sort();
+  const statuses = [...new Set(DATA.map(t=>t.status))].sort();
+  const pSel = $('fProject'), sSel = $('fStatus');
+  const pCur = pSel.value, sCur = sSel.value;
+  pSel.innerHTML = '<option value="">All projects</option>' + projects.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  sSel.innerHTML = '<option value="">All statuses</option>' + statuses.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  if(projects.includes(pCur)) pSel.value = pCur;
+  if(statuses.includes(sCur)) sSel.value = sCur;
+}
+
+function clearFilters(){
+  $('fSprint').value = '';
+  $('fProject').value = '';
+  $('fStatus').value = '';
+  render();
+}
+
+function render(){
+  populateFilterOptions();
+  const project = $('fProject').value;
+  const status = $('fStatus').value;
+
+  let list = DATA.filter(t =>
+    (!project || t.project === project) &&
+    (!status || t.status === status)
+  );
+  list = sortTickets(list);
+
+  $('sfDate').textContent = SF_READ_DATE;
+
+  const newDev = DATA.filter(t=>t.kind==='new').length;
+  const exist = DATA.filter(t=>t.kind==='exist').length;
+  const cfg = DATA.filter(t=>t.kind==='cfg').length;
+  $('stats').innerHTML = `
+    <div class="stat"><span class="n">${DATA.length}</span><span class="l">open tickets</span></div>
+    <div class="stat"><span class="n">${newDev}</span><span class="l">new logic</span></div>
+    <div class="stat"><span class="n">${exist}</span><span class="l">touch existing</span></div>
+    <div class="stat"><span class="n">${cfg}</span><span class="l">config / admin</span></div>`;
+
+  $('sfBanner').innerHTML = `<b>Salesforce org not scanned live.</b> Requirement reads and suggested changes below are as of ${SF_READ_DATE} — recommendations to verify, not a live check against your org. "Refresh from Jira" updates status/priority only and never touches these.`;
+
+  if(!list.length){
+    $('ticketList').innerHTML = `<div class="empty">No tickets match these filters. Try clearing them.</div>`;
+    $('footLeft').textContent = `Showing 0 of ${DATA.length}`;
+    $('footRight').textContent = lastJiraRefresh ? `Jira data refreshed ${lastJiraRefresh}` : 'Jira data from last full scan';
+    return;
+  }
+
+  // Group in board-priority order (falls back to encounter order for unranked boards)
+  const boardsInOrder = [...new Set(list.map(t=>t.project))]
+    .sort((a,b) => (boardRank({project:a})) - (boardRank({project:b})));
+
+  let html = '';
+  boardsInOrder.forEach(proj => {
+    const cfgEntry = BOARD_CONFIG[proj];
+    const group = list.filter(t => t.project === proj);
+    const fallbackNote = cfgEntry && !cfgEntry.usesSprints
+      ? `<span class="fallback">· no active sprint on this board — showing all open tickets</span>` : '';
+    html += `<div class="board-head">
+      <h2>${esc(proj)}</h2>
+      <span class="full">${esc(cfgEntry ? cfgEntry.name : '')} · ${group.length} ticket${group.length===1?'':'s'}</span>
+      ${fallbackNote}
+    </div>`;
+    html += group.map(t => `
+      <div class="ticket ${t.kind}">
+        <div class="row1">
+          <span class="key"><a href="${JIRA_SITE}/browse/${esc(t.key)}" target="_blank">${esc(t.key)}</a></span>
+          <span class="pill">${esc(t.priority)} · ${esc(t.issuetype)} · ${esc(t.status)}</span>
+        </div>
+        <h3>${esc(t.summary)}</h3>
+        <div class="lab">${LABELS[t.kind] || 'Not yet analyzed against Salesforce'}</div>
+        ${t.read ? `
+          <p class="sec"><b>Requirement</b>${esc(t.read)}</p>
+          <p class="sec"><b>Components to touch</b>${esc(t.touches)}</p>
+          <p class="sec suggest"><b>Suggested changes</b>${esc(t.suggest)}</p>
+          ${t.blockers ? `<p class="sec open"><b>Open / watch out</b>${esc(t.blockers)}</p>` : ''}
+        ` : `<p class="placeholder">New since the last full scan — no Salesforce read yet. Run a full sprint scan to analyze it.</p>`}
+      </div>`).join('');
+  });
+  $('ticketList').innerHTML = html;
+
+  $('footLeft').textContent = `Board order: ${boardsInOrder.join(' → ')} · showing ${list.length} of ${DATA.length}`;
+  $('footRight').textContent = lastJiraRefresh ? `Jira data refreshed ${lastJiraRefresh}` : 'Jira data from last full scan';
+}
+
+// ---- Live refresh: re-pulls current Jira fields via the Anthropic API + Atlassian MCP ----
+function buildMultiBoardJql(sprintOverride, projectFilter){
+  const boards = projectFilter ? [projectFilter] : Object.keys(BOARD_CONFIG);
+  const clauses = boards.map(key => {
+    const cfg = BOARD_CONFIG[key];
+    if(cfg && cfg.usesSprints){
+      if(sprintOverride){
+        const val = isNaN(sprintOverride) ? `"${sprintOverride}"` : sprintOverride;
+        return `(project = ${key} AND sprint = ${val})`;
+      }
+      return `(project = ${key} AND sprint in openSprints())`;
+    }
+    return `project = ${key}`;
+  });
+  return `assignee = currentUser() AND statusCategory != Done AND (${clauses.join(' OR ')}) ORDER BY priority DESC`;
+}
+
+async function refresh(){
+  const btn = $('refreshBtn'), icon = $('refreshIcon'), line = $('statusLine');
+  btn.disabled = true;
+  icon.innerHTML = '<span class="spin"></span>';
+  line.className = 'status-line';
+  line.textContent = 'Contacting Jira…';
+
+  const sprint = $('fSprint').value.trim();
+  const project = $('fProject').value.trim();
+  const jql = buildMultiBoardJql(sprint, project);
+
+  const prompt = `Call searchJiraIssuesUsingJql with this JQL, fields ["summary","priority","issuetype","status","project"], responseContentFormat "markdown": ${jql}
+
+If a board in the query has no active sprint and returns nothing, that's expected for Kanban-style boards — don't retry, just include whatever comes back.
+
+Then respond with ONLY a JSON array (no prose, no code fences) where each item is:
+{"key":"...", "project":"...", "priority":"...", "issuetype":"...", "status":"...", "summary":"..."}`;
+
+  try{
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 3000,
+        messages: [{ role: "user", content: prompt }],
+        mcp_servers: [{ type: "url", url: "https://mcp.atlassian.com/v1/mcp", name: "atlassian" }]
+      })
+    });
+    if(!resp.ok) throw new Error(`API returned ${resp.status}`);
+    const data = await resp.json();
+    const text = (data.content || [])
+      .filter(b => b.type === "text")
+      .map(b => b.text).join("\n")
+      .replace(/```json|```/g, "").trim();
+
+    const fresh = JSON.parse(text);
+    if(!Array.isArray(fresh)) throw new Error("Unexpected response shape");
+
+    const analysisByKey = Object.fromEntries(DATA.map(t => [t.key, t]));
+    DATA = fresh.map(f => {
+      const prior = analysisByKey[f.key];
+      return {
+        key: f.key, project: f.project || f.key.split('-')[0],
+        priority: f.priority, issuetype: f.issuetype, status: f.status, summary: f.summary,
+        kind: prior ? prior.kind : null,
+        read: prior ? prior.read : null,
+        touches: prior ? prior.touches : null,
+        blockers: prior ? prior.blockers : null,
+      };
+    });
+
+    lastJiraRefresh = new Date().toLocaleString();
+    line.className = 'status-line ok';
+    line.textContent = `Updated ${DATA.length} tickets from Jira just now. Salesforce reads unchanged.`;
+    render();
+  } catch(err){
+    line.className = 'status-line err';
+    line.textContent = `Couldn't refresh from Jira: ${err.message}. Showing the last known data.`;
+  } finally {
+    btn.disabled = false;
+    icon.textContent = '↻';
+  }
+}
+
+$('fProject').addEventListener('change', render);
+$('fStatus').addEventListener('change', render);
+render();
+</script>
+</body>
+</html>
